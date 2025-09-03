@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد مدیریت ربات اینستاگرام</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --border: #e5e7eb;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #374151;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .user-info {
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: var(--card-shadow);
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #0da271;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: black;
+        }
+        
+        .btn-warning:hover {
+            background: #e99a0c;
+        }
+        
+        .section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            gap: 10px;
+        }
+        
+        .section-header h2 {
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+        }
+        
+        .status-inactive {
+            background: rgba(156, 163, 175, 0.1);
+            color: var(--gray);
+        }
+        
+        .status-running {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+        
+        .status-verification {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s;
+            gap: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-success-sm {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-success-sm:hover {
+            background: #0da271;
+        }
+        
+        .btn-warning-sm {
+            background: var(--warning);
+            color: black;
+        }
+        
+        .btn-warning-sm:hover {
+            background: #e99a0c;
+        }
+        
+        .btn-danger-sm {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger-sm:hover {
+            background: #dc2626;
+        }
+        
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+        
+        .flash-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .flash-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--secondary);
+            border-right: 4px solid var(--secondary);
+        }
+        
+        .flash-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-right: 4px solid var(--danger);
+        }
+        
+        .flash-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border-right: 4px solid var(--warning);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .empty-state a:hover {
+            text-decoration: underline;
+        }
+        
+        .manual-check-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .manual-check-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .manual-check-btn {
+                bottom: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-robot"></i> داشبورد مدیریت ربات اینستاگرام</h1>
+        <p>خوش آمدید</p>
+        <p class="user-info">{{ username }}</p>
+    </div>
+
+    <div class="container">
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="nav">
+            <a href="{{ url_for('accounts.add_account') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                افزودن حساب اینستاگرام
+            </a>
+            <a href="{{ url_for('messages.add_message') }}" class="btn btn-success">
+                <i class="fas fa-envelope"></i>
+                افزودن پیام جدید
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">
+                <i class="fas fa-sign-out-alt"></i>
+                خروج
+            </a>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2><i class="fab fa-instagram"></i> حساب‌های اینستاگرام</h2>
+            </div>
+            
+            {% if accounts %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>نام کاربری</th>
+                            <th>وضعیت</th>
+                            <th>وضعیت ربات</th>
+                            <th>وضعیت تأیید</th>
+                            <th>تاریخ ایجاد</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in accounts %}
+                        <tr>
+                            <td>{{ account.instagram_username }}</td>
+                            <td>
+                                <span class="status-badge {% if account.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    <i class="fas fa-{% if account.is_active %}check{% else %}times{% endif %}"></i>
+                                    {{ 'فعال' if account.is_active else 'غیرفعال' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if bot_statuses[account.id] %}
+                                <span class="status-badge status-running">
+                                    <i class="fas fa-play-circle"></i> در حال اجرا
+                                </span>
+                                {% else %}
+                                <span class="status-badge status-inactive">
+                                    <i class="fas fa-stop-circle"></i> متوقف شده
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if verification_statuses[account.id].needs_verification %}
+                                <span class="status-badge status-verification">
+                                    <i class="fas fa-shield-alt"></i> نیاز به تأیید
+                                </span>
+                                {% else %}
+                                <span class="status-badge status-inactive">
+                                    <i class="fas fa-check-circle"></i> تأیید شده
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ account.created_at }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    {% if bot_statuses[account.id] %}
+                                    <a href="{{ url_for('bot_management.stop_bot', account_id=account.id) }}" class="action-btn btn-danger-sm">
+                                        <i class="fas fa-stop"></i>
+                                        توقف ربات
+                                    </a>
+                                    {% else %}
+                                    <a href="{{ url_for('bot_management.start_bot', account_id=account.id) }}" class="action-btn btn-success-sm">
+                                        <i class="fas fa-play"></i>
+                                        شروع ربات
+                                    </a>
+                                    {% endif %}
+                                    
+                                    <a href="{{ url_for('accounts.delete_account', account_id=account.id) }}" class="action-btn btn-danger-sm" onclick="return confirm('آیا از حذف این حساب اطمینان دارید؟')">
+                                        <i class="fas fa-trash"></i>
+                                        حذف
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-user-slash"></i>
+                    <p>هیچ حسابی اضافه نشده است.</p>
+                    <p><a href="{{ url_for('accounts.add_account') }}">افزودن حساب جدید</a></p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-comments"></i> پیام‌های پاسخ</h2>
+            </div>
+            
+            {% if messages %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>کلید</th>
+                            <th>محتوا</th>
+                            <th>تاریخ شروع</th>
+                            <th>تاریخ پایان</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for message in messages %}
+                        <tr>
+                            <td>{{ message.key }}</td>
+                            <td>{{ message.content[:50] }}{% if message.content|length > 50 %}...{% endif %}</td>
+                            <td>{{ message.start_date or '-' }}</td>
+                            <td>{{ message.end_date or '-' }}</td>
+                            <td>
+                                <span class="status-badge {% if message.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    <i class="fas fa-{% if message.is_active %}check{% else %}times{% endif %}"></i>
+                                    {{ 'فعال' if message.is_active else 'غیرفعال' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{{ url_for('messages.edit_message', message_id=message.id) }}" class="action-btn btn-warning-sm">
+                                        <i class="fas fa-edit"></i>
+                                        ویرایش
+                                    </a>
+                                    <a href="{{ url_for('messages.delete_message', message_id=message.id) }}" class="action-btn btn-danger-sm" onclick="return confirm('آیا از حذف این پیام اطمینان دارید؟')">
+                                        <i class="fas fa-trash"></i>
+                                        حذف
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-comment-slash"></i>
+                    <p>هیچ پیامی وجود ندارد.</p>
+                    <p><a href="{{ url_for('messages.add_message') }}">افزودن پیام جدید</a></p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // حذف خودکار پیام‌های فلش پس از 5 ثانیه
+        setTimeout(() => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                msg.style.opacity = '0';
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                }, 1000);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>افزودن حساب - Instagram DM Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #8a3ab9;
+            --secondary: #4c68d7;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --border: #e5e7eb;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f5f8fa;
+        }
+        
+        .card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .card-header {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+        }
+        
+        .btn-instagram {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-instagram:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(138, 58, 185, 0.4);
+            color: white;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 20px;
+            border: 2px solid #eee;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(138, 58, 185, 0.25);
+        }
+        
+        .back-btn {
+            color: var(--primary);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            color: var(--secondary);
+        }
+        
+        /* مودال تأیید دو مرحله‌ای */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .modal-title {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .modal-message {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        .modal-btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .modal-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .modal-btn-primary:hover {
+            background: #764ba2;
+        }
+        
+        .modal-btn-secondary {
+            background: var(--gray);
+            color: white;
+        }
+        
+        .modal-btn-secondary:hover {
+            background: #6b7280;
+        }
+        
+        .modal-btn-warning {
+            background: var(--warning);
+            color: black;
+        }
+        
+        .modal-btn-warning:hover {
+            background: #e99a0c;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+                padding: 1.5rem;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+            
+            .modal-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header text-center py-4">
+                        <i class="fas fa-plus-circle fa-2x mb-3"></i>
+                        <h4 class="card-title mb-0">افزودن حساب اینستاگرام</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- نمایش پیام‌های flash -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" action="/add_account" id="accountForm">
+                            <div class="mb-3">
+                                <label for="instagram_username" class="form-label">نام کاربری اینستاگرام</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@</span>
+                                    <input type="text" class="form-control" id="instagram_username" 
+                                           name="instagram_username" required placeholder="username">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="instagram_password" class="form-label">رمز عبور اینستاگرام</label>
+                                <input type="password" class="form-control" id="instagram_password" 
+                                       name="instagram_password" required placeholder="••••••••">
+                                <div class="form-text">اطلاعات شما به صورت امن ذخیره می‌شود</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-instagram">
+                                    <i class="fas fa-save me-2"></i>
+                                    ذخیره حساب
+                                </button>
+                                <a href="/dashboard" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-right me-2"></i>
+                                    بازگشت به داشبورد
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>راهنمایی</h6>
+                        <p class="mb-0 small">
+                            • برای امنیت بیشتر، توصیه می‌شود از رمز عبور دو مرحله‌ای در اینستاگرام استفاده کنید<br>
+                            • این سامانه فقط برای پاسخگویی به پیام‌ها استفاده می‌شود<br>
+                            • اطلاعات شما به صورت کاملا امن ذخیره می‌شود
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال تأیید دو مرحله‌ای -->
+    <div id="verificationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeVerificationModal()">&times;</span>
+            <h3 class="modal-title" id="modalTitle">تأیید دو مرحله‌ای</h3>
+            <p class="modal-message" id="modalMessage">لطفاً کد تأیید ارسال شده را وارد کنید:</p>
+            <input type="text" id="verificationCode" class="modal-input" placeholder="کد ۶ رقمی" maxlength="6">
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" onclick="submitVerificationCode()">تأیید</button>
+                <button class="modal-btn modal-btn-warning" onclick="requestNewCode()">ارسال کد جدید</button>
+                <button class="modal-btn modal-btn-secondary" onclick="closeVerificationModal()">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentAccountId = null;
+        let currentUsername = null;
+        let currentMethod = null;
+        
+        // باز کردن مودال تأیید دو مرحله‌ای
+        function openVerificationModal(accountId, username, method) {
+            currentAccountId = accountId;
+            currentUsername = username;
+            currentMethod = method;
+            
+            document.getElementById('modalTitle').textContent = `تأیید دو مرحله‌ای برای ${username}`;
+            document.getElementById('modalMessage').textContent = `کد تأیید از طریق ${method === 'sms' ? 'پیامک' : 'ایمیل'} ارسال شده است. لطفاً کد را وارد کنید:`;
+            document.getElementById('verificationCode').value = '';
+            
+            document.getElementById('verificationModal').style.display = 'block';
+        }
+        
+        // بستن مودال تأیید دو مرحله‌ای
+        function closeVerificationModal() {
+            document.getElementById('verificationModal').style.display = 'none';
+            currentAccountId = null;
+            currentUsername = null;
+            currentMethod = null;
+        }
+        
+        // ارسال کد تأیید
+        function submitVerificationCode() {
+            const code = document.getElementById('verificationCode').value.trim();
+            
+            if (!code || code.length !== 6) {
+                alert('لطفاً یک کد تأیید ۶ رقمی معتبر وارد کنید.');
+                return;
+            }
+            
+            fetch(`/api/submit_verification/${currentAccountId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ کد تأیید با موفقیت پذیرفته شد!');
+                    closeVerificationModal();
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('❌ کد تأیید نامعتبر است. لطفاً دوباره تلاش کنید.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('❌ خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+            });
+        }
+        
+        // درخواست کد جدید
+        function requestNewCode() {
+            const newMethod = currentMethod === 'sms' ? 'email' : 'sms';
+            
+            fetch(`/api/request_verification/${currentAccountId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ method: newMethod })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`✅ کد جدید از طریق ${newMethod === 'sms' ? 'پیامک' : 'ایمیل'} ارسال شد.`);
+                    currentMethod = newMethod;
+                    document.getElementById('modalMessage').textContent = `کد تأیید از طریق ${newMethod === 'sms' ? 'پیامک' : 'ایمیل'} ارسال شده است. لطفاً کد را وارد کنید:`;
+                } else {
+                    alert('❌ خطا در درخواست کد جدید. لطفاً دوباره تلاش کنید.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('❌ خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+            });
+        }
+        
+        // بررسی وضعیت هنگام بارگذاری صفحه
+        document.addEventListener('DOMContentLoaded', function() {
+            // بررسی اگر session نشان دهد که نیاز به تأیید دو مرحله‌ای داریم
+            const verificationRequired = "{{ verification_required | lower }}" === 'true';
+            const verificationAccountId = "{{ verification_account_id }}";
+            const verificationMethod = "{{ verification_method }}";
+            const verificationUsername = "{{ verification_username }}";
+            
+            if (verificationRequired && verificationAccountId && verificationAccountId !== 'None') {
+                openVerificationModal(verificationAccountId, verificationUsername, verificationMethod);
+            }
+        });
+
+        // ارسال فرم حساب
+        document.getElementById('accountForm').addEventListener('submit', function(e) {
+            // اینجا می‌توانید اعتبارسنجی بیشتری انجام دهید
+            // در صورت نیاز به تأیید دو مرحله‌ای، سرور باید پاسخ مناسب بدهد
+        });
+        
+        // بستن مودال با کلیک خارج از آن
+        window.onclick = function(event) {
+            const modal = document.getElementById('verificationModal');
+            if (event.target === modal) {
+                closeVerificationModal();
+            }
+        }
+        
+        // بستن مودال با کلید Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeVerificationModal();
+            }
+        });
+    </script>
+</body>
+</html>

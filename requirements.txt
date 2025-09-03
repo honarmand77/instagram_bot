@@ -1,0 +1,4 @@
+instagrapi==1.16.20
+Werkzeug==2.3.7
+Flask==2.3.3
+requests==2.31.0

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>افزودن پیام - Instagram DM Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #8a3ab9;
+            --secondary: #4c68d7;
+        }
+        
+        body {
+            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f5f8fa;
+        }
+        
+        .card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .card-header {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+        }
+        
+        .btn-instagram {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-instagram:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(138, 58, 185, 0.4);
+            color: white;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 20px;
+            border: 2px solid #eee;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(138, 58, 185, 0.25);
+        }
+        
+        .preview-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            border-right: 3px solid var(--primary);
+        }
+        
+        .emoji-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .emoji-btn {
+            font-size: 1.2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        
+        .emoji-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .key-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .key-type-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .key-type-btn.active {
+            border-color: var(--primary);
+            background-color: rgba(138, 58, 185, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .key-type-btn i {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header text-center py-4">
+                        <i class="fas fa-comment-alt fa-2x mb-3"></i>
+                        <h4 class="card-title mb-0">افزودن پیام پاسخ جدید</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- نمایش پیام‌های flash -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" action="/add_message">
+                            <!-- انتخاب نوع کلید -->
+                            <div class="mb-4">
+                                <label class="form-label d-block">نوع کلید *</label>
+                                <div class="key-type-selector">
+                                    <div class="key-type-btn active" data-type="number" onclick="selectKeyType('number')">
+                                        <i class="fas fa-hashtag"></i>
+                                        <span>عددی</span>
+                                        <small class="d-block text-muted">مانند: 1, 2, 3</small>
+                                    </div>
+                                    <div class="key-type-btn" data-type="text" onclick="selectKeyType('text')">
+                                        <i class="fas fa-font"></i>
+                                        <span>متنی</span>
+                                        <small class="d-block text-muted">مانند: سلام, قیمت</small>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="key_type" name="key_type" value="number">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="key" class="form-label">کلید پیام *</label>
+                                <input type="text" class="form-control" id="key" name="key" 
+                                       required placeholder="مثال: 1 یا سلام" pattern=".*\S+.*">
+                                <div class="form-text" id="key-help">
+                                    این کلید باید توسط کاربر در پیام ارسال شود (فقط اعداد مجاز هستند)
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="content" class="form-label">متن پیام *</label>
+                                <textarea class="form-control" id="content" name="content" 
+                                          rows="5" required placeholder="متن پاسخ خود را وارد کنید..."></textarea>
+                                <div class="form-text">
+                                    <span class="d-block mb-1">می‌توانید از اموجی‌های زیر استفاده کنید:</span>
+                                    <div class="emoji-list">
+                                        <button type="button" class="emoji-btn" onclick="addEmoji('🙏')">🙏</button>
+                                        <button type="button" class="emoji-btn" onclick="addEmoji('👍')">👍</button>
+                                        <button type="button" class="emoji-btn" onclick="addEmoji('❤️')">❤️</button>
+                                        <button type="button" class="emoji-btn" onclick="addEmoji('😊')">😊</button>
+                                        <button type="button" class="emoji-btn" onclick="addEmoji('✅')">✅</button>
+                                        <button type="button" class="emoji-btn" onclick="addEmoji('📞')">📞</button>
+                                        <button type="button" class="emoji-btn" onclick="addEmoji('💰')">💰</button>
+                                        <button type="button" class="emoji-btn" onclick="addEmoji('🔥')">🔥</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="start_date" class="form-label">تاریخ شروع (اختیاری)</label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date">
+                                    <div class="form-text">پیام از این تاریخ به بعد فعال می‌شود</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-4">
+                                    <label for="end_date" class="form-label">تاریخ پایان (اختیاری)</label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date">
+                                    <div class="form-text">پیام پس از این تاریخ غیرفعال می‌شود</div>
+                                </div>
+                            </div>
+                            
+                            <!-- پیش نمایش پیام -->
+                            <div class="mb-4">
+                                <label class="form-label">پیش نمایش پیام</label>
+                                <div class="preview-card">
+                                    <p id="messagePreview">پیش نمایش پیام اینجا نمایش داده می‌شود...</p>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-instagram">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    افزودن پیام
+                                </button>
+                                <a href="/dashboard" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-right me-2"></i>
+                                    بازگشت به داشبورد
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading"><i class="fas fa-lightbulb me-2"></i>نکات مهم</h6>
+                        <p class="mb-0 small">
+                            • کلید پیام باید یکتا باشد و کاربر آن را در پیام ارسال کند<br>
+                            • برای کلیدهای عددی فقط از اعداد استفاده کنید (مانند: 1, 2, 3)<br>
+                            • برای کلیدهای متنی از کلمات معنادار استفاده کنید (مانند: سلام, قیمت, تماس)<br>
+                            • می‌توانید برای دوره‌های خاص (مانند تخفیف‌ها) تاریخ شروع و پایان تعیین کنید<br>
+                            • از اموجی‌ها برای جذاب‌تر شدن پیام‌ها استفاده کنید
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // انتخاب نوع کلید
+        function selectKeyType(type) {
+            document.querySelectorAll('.key-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.querySelector(`.key-type-btn[data-type="${type}"]`).classList.add('active');
+            document.getElementById('key_type').value = type;
+            
+            // به روزرسانی راهنمای فیلد کلید
+            const keyHelp = document.getElementById('key-help');
+            const keyInput = document.getElementById('key');
+            
+            if (type === 'number') {
+                keyHelp.textContent = 'این کلید باید توسط کاربر در پیام ارسال شود (فقط اعداد مجاز هستند)';
+                keyInput.pattern = "^[0-9]+$";
+                keyInput.placeholder = "مثال: 1 یا 2 یا 3";
+            } else {
+                keyHelp.textContent = 'این کلید باید توسط کاربر در پیام ارسال شود (هر متنی مجاز است)';
+                keyInput.pattern = ".*\\S+.*";
+                keyInput.placeholder = "مثال: سلام یا قیمت یا تماس";
+            }
+        }
+        
+        // پیش نمایش پیام
+        const contentInput = document.getElementById('content');
+        const previewElement = document.getElementById('messagePreview');
+        
+        contentInput.addEventListener('input', function() {
+            previewElement.textContent = this.value || 'پیش نمایش پیام اینجا نمایش داده می‌شود...';
+        });
+        
+        // افزودن اموجی به متن
+        function addEmoji(emoji) {
+            const textarea = document.getElementById('content');
+            const startPos = textarea.selectionStart;
+            const endPos = textarea.selectionEnd;
+            const text = textarea.value;
+            
+            textarea.value = text.substring(0, startPos) + emoji + text.substring(endPos, text.length);
+            textarea.focus();
+            textarea.selectionStart = startPos + emoji.length;
+            textarea.selectionEnd = startPos + emoji.length;
+            
+            // به روزرسانی پیش نمایش
+            previewElement.textContent = textarea.value || 'پیش نمایش پیام اینجا نمایش داده می‌شود...';
+        }
+        
+        // اعتبارسنجی فرم
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const keyType = document.getElementById('key_type').value;
+            const keyValue = document.getElementById('key').value.trim();
+            
+            if (keyType === 'number' && !/^\d+$/.test(keyValue)) {
+                e.preventDefault();
+                alert('برای کلیدهای عددی فقط می‌توانید از اعداد استفاده کنید.');
+                return false;
+            }
+            
+            if (keyValue === '') {
+                e.preventDefault();
+                alert('لطفاً یک کلید معتبر وارد کنید.');
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

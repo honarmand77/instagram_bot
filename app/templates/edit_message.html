@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ویرایش پیام - Instagram DM Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #8a3ab9;
+            --secondary: #4c68d7;
+        }
+        
+        body {
+            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f5f8fa;
+        }
+        
+        .card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .card-header {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+        }
+        
+        .btn-instagram {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-instagram:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(138, 58, 185, 0.4);
+            color: white;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 12px 20px;
+            border: 2px solid #eee;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(138, 58, 185, 0.25);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .preview-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            border-right: 3px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header text-center py-4">
+                        <i class="fas fa-edit fa-2x mb-3"></i>
+                        <h4 class="card-title mb-0">ویرایش پیام پاسخ</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- نمایش پیام‌های flash -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" action="/edit_message/{{ message.id }}">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="key" class="form-label">کلید پیام</label>
+                                    <input type="text" class="form-control" id="key" 
+                                           value="{{ message.key }}" disabled>
+                                    <div class="form-text">کلید پیام قابل تغییر نیست</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">وضعیت</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="is_active" name="is_active" 
+                                               {{ 'checked' if message.is_active else '' }}>
+                                        <label class="form-check-label" for="is_active">
+                                            پیام فعال باشد
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="content" class="form-label">متن پیام</label>
+                                <textarea class="form-control" id="content" name="content" 
+                                          rows="5" required placeholder="متن پاسخ خود را وارد کنید...">{{ message.content }}</textarea>
+                                <div class="form-text">می‌توانید از اموجی و نشانه‌ها برای زیبایی پیام استفاده کنید</div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="start_date" class="form-label">تاریخ شروع (اختیاری)</label>
+                                    <input type="date" class="form-control" id="start_date" 
+                                           name="start_date" value="{{ message.start_date or '' }}">
+                                </div>
+                                
+                                <div class="col-md-6 mb-4">
+                                    <label for="end_date" class="form-label">تاریخ پایان (اختیاری)</label>
+                                    <input type="date" class="form-control" id="end_date" 
+                                           name="end_date" value="{{ message.end_date or '' }}">
+                                </div>
+                            </div>
+                            
+                            <!-- پیش نمایش پیام -->
+                            <div class="mb-4">
+                                <label class="form-label">پیش نمایش پیام</label>
+                                <div class="preview-card">
+                                    <p id="messagePreview">{{ message.content[:100] }}...</p>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-instagram">
+                                    <i class="fas fa-save me-2"></i>
+                                    ذخیره تغییرات
+                                </button>
+                                <a href="/dashboard" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-right me-2"></i>
+                                    بازگشت به داشبورد
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // پیش نمایش پیام
+        const contentInput = document.getElementById('content');
+        const previewElement = document.getElementById('messagePreview');
+        
+        contentInput.addEventListener('input', function() {
+            previewElement.textContent = this.value.length > 100 
+                ? this.value.substring(0, 100) + '...' 
+                : this.value;
+        });
+    </script>
+</body>
+</html>
